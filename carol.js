@@ -68,6 +68,11 @@ const Carol = class {
     this.ypos = 0;
     this.directionIdx = 0;
     this.board = new Board();
+    const readline = require('readline');
+    this.interface = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
   }
 
   toString() {
@@ -103,31 +108,81 @@ const Carol = class {
   }
 
   hasBeeper() {
-    return this.board.hasBeeper(this.xpos, this.ypos);
+    console.log(this.board.hasBeeper(this.xpos, this.ypos));
   }
 
   render() {
     this.board.render(this.xpos, this.ypos, this.getDirection());
   }
 
+  runCommand(command) {
+    switch (command) {
+      case 'move':
+        this.move();
+      break;
+      case 'turn':
+        this.turn();
+      break;
+      case 'pick':
+        this.pick();
+      break;
+      case 'drop':
+        this.drop();
+      break;
+      case 'beeper?':
+        this.hasBeeper();
+      break;
+      // case 'if':
+      //   this.interface.input.resume();
+      //   this.interface.question("if command:else command", (line) => {
+      //     const [ ifCommand, elseCommand ] = line.split(':');
+      //     if (this.hasBeeper()) {
+      //       this.runCommand(ifCommand)
+      //     } else {
+      //       this.runCommand(elseCommand)
+      //     }
+      //   })
+      // break;
+      default:
+        console.log('invalid command');
+      }
+  }
+
+  tick() {
+    this.render();
+    return new Promise((res, rej) => {
+      this.interface.input.resume();
+      this.interface.question("Command? ", (command) => {
+        this.runCommand(command);
+        res();
+        this.tick();
+      });
+    });
+  }
 }
 
+
 const c = new Carol();
-c.move()
-console.log(String(c))
-c.render();
-c.turn()
-console.log(String(c))
-c.move()
-c.move()
-console.log(String(c))
-c.drop()
-c.drop()
-c.move()
-console.log(String(c))
-c.drop()
-c.move()
-console.log(String(c))
-console.log(c.hasBeeper())
-console.log(String(c))
-c.render()
+// c.move()
+// console.log(String(c))
+// c.render();
+// c.turn()
+// console.log(String(c))
+// c.move()
+// c.move()
+// console.log(String(c))
+// c.drop()
+// c.drop()
+// c.move()
+// console.log(String(c))
+// c.drop()
+// c.move()
+// console.log(String(c))
+// console.log(c.hasBeeper())
+// console.log(String(c))
+// c.render()
+c.run = async () => {
+  c.tick();
+}
+
+c.run();
