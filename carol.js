@@ -1,35 +1,62 @@
 const Board = class {
   constructor(carol) {
     this.boardSize = 9;
-    // this.carol = carol;
-    // beeper = [xpos, ypos, count];
-    // this.beepers.set('xpos,ypos', count)
     this.beepers = new Map();
   }
 
+  beeperCount(xpos, ypos) {
+    return this.beepers.get(`${xpos},${ypos}`) || 0;
+  }
+
   pick(xpos, ypos) {
-    const beeperCount = this.beepers.get(`${xpos},${ypos}`);
-    if (!beeperCount) {
+    if (!this.beeperCount(xpos, ypos)) {
       throw Error(`No beepers on ${xpos}, ${ypos}`);
     }
-    this.beepers.set(`${xpos},${ypos}`, beeperCount - 1);
+    this.beepers.set(`${xpos},${ypos}`, this.beeperCount(xpos, ypos) - 1);
   }
 
   drop(xpos, ypos) {
-    const beeperCount = this.beepers.get(`${xpos},${ypos}`) || 0;
-    this.beepers.set(`${xpos},${ypos}`, beeperCount + 1);
+    this.beepers.set(`${xpos},${ypos}`, this.beeperCount(xpos, ypos) + 1);
+    console.log(this.beepers)
   }
 
-  render(xpos, ypos, direction) {
-    const center = Math.floor(this.boardSize / 2);
+  hasBeeper(xpos, ypos) {
+    return this.beeperCount(xpos, ypos) > 0;
+  }
+
+  render(carolX, carolY, carolDir) {
+    // init variables
+    const radius = Math.floor(this.boardSize / 2);
     const BLANK = '.';
     let board = [];
+
+    // create board
     for (let i = 0; i < this.boardSize; i++) {
       board.push(Array(this.boardSize).fill(BLANK));
     }
 
-    board[center][center] = direction;
-    console.log(board);
+    // render
+    const borderLeft = carolX - radius;
+    const borderTop = carolY - radius;
+    const borderRight = carolX + radius;
+    const borderBottom = carolY + radius;
+    for (let y = borderTop; y < borderBottom; y++) {
+      for (let x = borderLeft; x < borderRight; x++) {
+        // render carol
+        if (x === carolX && y === carolY) {
+          process.stdout.write(carolDir);
+          continue;
+        }
+
+        // render beeperCount
+        if (this.hasBeeper(x, y)) {
+          process.stdout.write(String(this.beeperCount(x, y)));
+        } else {
+          process.stdout.write(BLANK);
+        }
+      }
+      process.stdout.write('\n');
+    }
   }
 }
 
@@ -53,11 +80,11 @@ const Carol = class {
 
   move() {
     if (this.directionIdx === 0) {
-      this.ypos += 1;
+      this.ypos -= 1;
     } else if (this.directionIdx === 1) {
       this.xpos += 1;
     } else if (this.directionIdx === 2) {
-      this.ypos -= 1;
+      this.ypos += 1;
     } else if (this.directionIdx === 3) {
       this.xpos -= 1;
     }
@@ -75,6 +102,10 @@ const Carol = class {
     this.board.drop(this.xpos, this.ypos);
   }
 
+  hasBeeper() {
+    return this.board.hasBeeper(this.xpos, this.ypos);
+  }
+
   render() {
     this.board.render(this.xpos, this.ypos, this.getDirection());
   }
@@ -86,10 +117,17 @@ c.move()
 console.log(String(c))
 c.render();
 c.turn()
+console.log(String(c))
 c.move()
 c.move()
+console.log(String(c))
 c.drop()
 c.drop()
-c.pick()
+c.move()
+console.log(String(c))
+c.drop()
+c.move()
+console.log(String(c))
+console.log(c.hasBeeper())
 console.log(String(c))
 c.render()
