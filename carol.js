@@ -1,3 +1,38 @@
+const Board = class {
+  constructor(carol) {
+    this.boardSize = 9;
+    // this.carol = carol;
+    // beeper = [xpos, ypos, count];
+    // this.beepers.set('xpos,ypos', count)
+    this.beepers = new Map();
+  }
+
+  pick(xpos, ypos) {
+    const beeperCount = this.beepers.get(`${xpos},${ypos}`);
+    if (!beeperCount) {
+      throw Error(`No beepers on ${xpos}, ${ypos}`);
+    }
+    this.beepers.set(`${xpos},${ypos}`, beeperCount - 1);
+  }
+
+  drop(xpos, ypos) {
+    const beeperCount = this.beepers.get(`${xpos},${ypos}`) || 0;
+    this.beepers.set(`${xpos},${ypos}`, beeperCount + 1);
+  }
+
+  render(xpos, ypos, direction) {
+    const center = Math.floor(this.boardSize / 2);
+    const BLANK = '.';
+    let board = [];
+    for (let i = 0; i < this.boardSize; i++) {
+      board.push(Array(this.boardSize).fill(BLANK));
+    }
+
+    board[center][center] = direction;
+    console.log(board);
+  }
+}
+
 
 const Carol = class {
   constructor() {
@@ -5,9 +40,7 @@ const Carol = class {
     this.xpos = 0;
     this.ypos = 0;
     this.directionIdx = 0;
-    // beeper = [xpos, ypos, count];
-    // this.beepers.set('xpos,ypos', count)
-    this.beepers = new Map();
+    this.board = new Board();
   }
 
   toString() {
@@ -35,31 +68,17 @@ const Carol = class {
   }
 
   pick() {
-    const beeperCount = this.beepers.get(`${this.xpos},${this.ypos}`);
-    if (!beeperCount) {
-      throw Error(`No beepers on ${this.xpos}, ${this.ypos}`);
-    }
-    this.beepers.set(`${this.xpos},${this.ypos}`, beeperCount - 1);
+    this.board.pick(this.xpos, this.ypos);
   }
 
   drop() {
-    const beeperCount = this.beepers.get(`${this.xpos},${this.ypos}`) || 0;
-    this.beepers.set(`${this.xpos},${this.ypos}`, beeperCount + 1);
+    this.board.drop(this.xpos, this.ypos);
   }
 
   render() {
-    const boardSize = 9;
-    const center = Math.floor(boardSize / 2);
-    const BLANK = '.';
-    const CAROL = this.getDirection();
-    let board = []
-    for (let i = 0; i < boardSize; i++) {
-      board.push(Array(boardSize).fill(BLANK));
-    }
-
-    board[center][center] = CAROL;
-    console.log(board);
+    this.board.render(this.xpos, this.ypos, this.getDirection());
   }
+
 }
 
 const c = new Carol();
