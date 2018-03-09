@@ -5,6 +5,9 @@ const Carol = class {
     this.xpos = 0;
     this.ypos = 0;
     this.directionIdx = 0;
+    // beeper = [xpos, ypos, count];
+    // this.beepers.set('xpos,ypos', count)
+    this.beepers = new Map();
   }
 
   toString() {
@@ -31,6 +34,19 @@ const Carol = class {
     this.directionIdx = (this.directionIdx + 1) % 4;
   }
 
+  pick() {
+    const beeperCount = this.beepers.get(`${this.xpos},${this.ypos}`);
+    if (!beeperCount) {
+      throw Error(`No beepers on ${this.xpos}, ${this.ypos}`);
+    }
+    this.beepers.set(`${this.xpos},${this.ypos}`, beeperCount - 1);
+  }
+
+  drop() {
+    const beeperCount = this.beepers.get(`${this.xpos},${this.ypos}`) || 0;
+    this.beepers.set(`${this.xpos},${this.ypos}`, beeperCount + 1);
+  }
+
   render() {
     const boardSize = 9;
     const center = Math.floor(boardSize / 2);
@@ -53,5 +69,8 @@ c.render();
 c.turn()
 c.move()
 c.move()
+c.drop()
+c.drop()
+c.pick()
 console.log(String(c))
 c.render()
