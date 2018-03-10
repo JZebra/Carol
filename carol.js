@@ -146,6 +146,20 @@ const Carol = class {
           });
         });
       break;
+      case 'while':
+        return new Promise((res, rej) => {
+          this.interface.question("while hasBeeper command", (command) => {
+            res(command);
+          });
+        }).then(p => {
+          //             while (this.hasBeeper()) {
+          //   console.log('running command in while loop')
+          //   this.runCommand(command);
+          // }
+
+          console.log(p)
+        });
+      break;
       default:
         console.log('invalid command');
       }
