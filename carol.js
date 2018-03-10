@@ -132,17 +132,20 @@ const Carol = class {
       case 'beeper?':
         this.hasBeeper();
       break;
-      // case 'if':
-      //   this.interface.input.resume();
-      //   this.interface.question("if command:else command", (line) => {
-      //     const [ ifCommand, elseCommand ] = line.split(':');
-      //     if (this.hasBeeper()) {
-      //       this.runCommand(ifCommand)
-      //     } else {
-      //       this.runCommand(elseCommand)
-      //     }
-      //   })
-      // break;
+      case 'if':
+        return new Promise((res, rej) => {
+          this.interface.question("if command:else command", (line) => {
+            const [ ifCommand, elseCommand ] = line.split(':');
+            if (this.hasBeeper()) {
+              this.runCommand(ifCommand)
+            } else {
+              this.runCommand(elseCommand)
+            }
+            res();
+            this.tick();
+          });
+        });
+      break;
       default:
         console.log('invalid command');
       }
@@ -151,7 +154,6 @@ const Carol = class {
   tick() {
     this.render();
     return new Promise((res, rej) => {
-      this.interface.input.resume();
       this.interface.question("Command? ", (command) => {
         this.runCommand(command);
         res();
