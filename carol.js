@@ -72,6 +72,7 @@ const Carol = class {
       input: process.stdin,
       output: process.stdout
     });
+    this.subroutines = new Map();
   }
 
   toString() {
@@ -108,7 +109,6 @@ const Carol = class {
 
   hasBeeper() {
     const beeper = this.board.hasBeeper(this.xpos, this.ypos);
-    console.log(beeper);
     return beeper;
   }
 
@@ -117,6 +117,14 @@ const Carol = class {
   }
 
   runCommand(command) {
+    // check for subroutines first
+    // TODO: maybe this should be in the default block?
+    if (this.subroutines.has(command)) {
+      const subroutine = this.subroutines.get(command);
+      subroutine.split(';').forEach(command => {this.runCommand(command)});
+      return
+    }
+
     switch (command) {
       case 'move':
         this.move();
@@ -160,9 +168,30 @@ const Carol = class {
           this.tick();
         });
       break;
+      case 'def':
+      // TODO: run validations so we don't set harmful subroutines
+        this.askFnName().then(this.askFnDef.bind(this)).then(([name, fnLine]) => {
+          this.subroutines.set(name, fnLine);
+          console.log(`set subroutine ${name} to ${fnLine}`);
+          this.tick();
+        });
+      break;
       default:
         console.log('invalid command');
       }
+  }
+
+  askFnName() {
+    return new Promise((res, rej) => {
+      this.interface.question("new command name? ", name => { res(name) });
+    });
+  }
+
+  // pass down the fnName from the previous promise
+  askFnDef(fnName) {
+    return new Promise((res, rej) => {
+      this.interface.question("enter new function as one line split by semicolons ", line => { res([fnName, line]) });
+    });
   }
 
   tick() {
@@ -201,5 +230,4 @@ const c = new Carol();
 c.run = async () => {
   c.tick();
 }
-
 c.run();
