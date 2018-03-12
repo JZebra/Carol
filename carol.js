@@ -17,7 +17,6 @@ const Board = class {
 
   drop(xpos, ypos) {
     this.beepers.set(`${xpos},${ypos}`, this.beeperCount(xpos, ypos) + 1);
-    console.log(this.beepers)
   }
 
   hasBeeper(xpos, ypos) {
@@ -108,7 +107,9 @@ const Carol = class {
   }
 
   hasBeeper() {
-    console.log(this.board.hasBeeper(this.xpos, this.ypos));
+    const beeper = this.board.hasBeeper(this.xpos, this.ypos);
+    console.log(beeper);
+    return beeper;
   }
 
   render() {
@@ -134,16 +135,17 @@ const Carol = class {
       break;
       case 'if':
         return new Promise((res, rej) => {
-          this.interface.question("if command:else command", (line) => {
+          this.interface.question("if beeper? command:else command", (line) => {
             const [ ifCommand, elseCommand ] = line.split(':');
             if (this.hasBeeper()) {
-              this.runCommand(ifCommand)
+              res(ifCommand);
             } else {
-              this.runCommand(elseCommand)
+              res(elseCommand);
             }
-            res();
-            this.tick();
           });
+        }).then(command => {
+          this.runCommand.bind(this)(command);
+          this.tick();
         });
       break;
       case 'while':
@@ -169,10 +171,11 @@ const Carol = class {
     this.render();
     return new Promise((res, rej) => {
       this.interface.question("Command? ", (command) => {
-        this.runCommand(command);
-        res();
-        this.tick();
+        res(command);
       });
+      }).then(command => {
+        this.runCommand(command);
+        this.tick();
     });
   }
 }
