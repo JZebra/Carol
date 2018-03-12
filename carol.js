@@ -150,16 +150,14 @@ const Carol = class {
       break;
       case 'while':
         return new Promise((res, rej) => {
-          this.interface.question("while hasBeeper command", (command) => {
+          this.interface.question("while beeper? command", (command) => {
             res(command);
           });
-        }).then(p => {
-          //             while (this.hasBeeper()) {
-          //   console.log('running command in while loop')
-          //   this.runCommand(command);
-          // }
-
-          console.log(p)
+        }).then(command => {
+          while (this.hasBeeper.bind(this)()) {
+            this.runCommand(command);
+          }
+          this.tick();
         });
       break;
       default:
